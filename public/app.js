@@ -1,296 +1,165 @@
-:root {
-  --bg: #0f172a;
-  --panel: #111827;
-  --panel-soft: #1f2937;
-  --primary: #22c55e;
-  --primary-strong: #16a34a;
-  --text: #e5e7eb;
-  --muted: #94a3b8;
-  --border: rgba(148, 163, 184, 0.18);
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --success: #10b981;
-  --shadow: 0 25px 50px rgba(15, 23, 42, 0.3);
-}
+const statusNode = document.getElementById('status');
+const receiptListNode = document.getElementById('receiptList');
+const receiptForm = document.getElementById('receiptForm');
+const adminForm = document.getElementById('adminForm');
+const payForm = document.getElementById('payForm');
 
-* {
-  box-sizing: border-box;
-}
+async function loadHealth() {
+  if (!statusNode) return;
 
-html {
-  color-scheme: dark;
-}
-
-body {
-  margin: 0;
-  background: linear-gradient(180deg, #020817 0%, #0f172a 100%);
-  color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.container {
-  width: min(1100px, calc(100% - 2rem));
-  margin: 0 auto;
-}
-
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  backdrop-filter: blur(12px);
-  background: rgba(15, 23, 42, 0.72);
-  border-bottom: 1px solid var(--border);
-}
-
-.nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-}
-
-.brand {
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--primary);
-}
-
-nav {
-  display: flex;
-  gap: 1rem;
-}
-
-nav a {
-  color: var(--text);
-  text-decoration: none;
-  opacity: 0.8;
-}
-
-.page {
-  padding: 3rem 0 4rem;
-}
-
-.hero {
-  display: grid;
-  grid-template-columns: 1.4fr 0.9fr;
-  gap: 2rem;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.badge {
-  display: inline-block;
-  margin-bottom: 1rem;
-  padding: 0.45rem 0.8rem;
-  background: rgba(34, 197, 94, 0.12);
-  color: var(--primary);
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  border-radius: 999px;
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.hero-copy h1 {
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  line-height: 1.1;
-  margin: 0;
-}
-
-.hero-copy p {
-  color: var(--muted);
-  font-size: 1.05rem;
-  max-width: 52ch;
-}
-
-.grid {
-  display: grid;
-  gap: 2rem;
-}
-
-.two-col {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.panel,
-.status-card {
-  background: rgba(17, 24, 39, 0.88);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
-}
-
-.status-card h2,
-.panel h2 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-}
-
-.meta-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.meta-grid span,
-.stat-box span {
-  display: block;
-  color: var(--muted);
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.meta-grid strong,
-.stat-box strong {
-  display: block;
-  margin-top: 0.45rem;
-  font-size: 1.2rem;
-}
-
-.stack-form,
-.inline-form {
-  display: grid;
-  gap: 1rem;
-}
-
-label {
-  display: grid;
-  gap: 0.45rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-input,
-textarea,
-select,
-button {
-  font: inherit;
-}
-
-input,
-textarea,
-select {
-  width: 100%;
-  padding: 0.9rem 1rem;
-  background: rgba(15, 23, 42, 0.8);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-
-button {
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
-  color: #03130a;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 0.9rem 1.2rem;
-  transition: transform 0.15s ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
-}
-
-.message {
-  margin-top: 1rem;
-  min-height: 1.5rem;
-  color: var(--muted);
-}
-
-.message.error {
-  color: #fca5a5;
-}
-
-.message.success {
-  color: #86efac;
-}
-
-.receipt-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 0.8rem;
-}
-
-.receipt-list li {
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: rgba(15, 23, 42, 0.65);
-}
-
-.receipt-list strong {
-  display: block;
-  margin-bottom: 0.2rem;
-}
-
-.admin-page {
-  max-width: 900px;
-}
-
-.admin-card {
-  padding: 2rem;
-}
-
-.inline-form {
-  grid-template-columns: minmax(200px, 1fr) auto;
-  align-items: end;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.stat-box {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1rem;
-}
-
-.table-panel {
-  margin-top: 1.5rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 0.9rem 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-th {
-  color: var(--muted);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-@media (max-width: 760px) {
-  .hero,
-  .two-col,
-  .inline-form,
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .nav {
-    flex-direction: column;
-    gap: 0.8rem;
+  try {
+    const response = await fetch('/health');
+    const data = await response.json();
+    statusNode.textContent = data.ok ? `Online • ${data.environment}` : 'Unavailable';
+    statusNode.classList.toggle('success', data.ok);
+  } catch (error) {
+    statusNode.textContent = 'Offline';
+    statusNode.classList.add('error');
   }
 }
+
+async function loadReceipts() {
+  if (!receiptListNode) return;
+
+  try {
+    const response = await fetch('/api/receipts');
+    const data = await response.json();
+
+    if (!data.receipts || !data.receipts.length) {
+      receiptListNode.innerHTML = '<li>No receipts yet.</li>';
+      return;
+    }
+
+    receiptListNode.innerHTML = data.receipts
+      .map(
+        (receipt) => `
+          <li>
+            <strong>${receipt.amount || 'Unknown amount'}</strong>
+            <div>From: ${receipt.sender || 'Unknown sender'}</div>
+            <div>Status: ${receipt.status || 'pending'}</div>
+            <div>${new Date(receipt.created_at).toLocaleString()}</div>
+          </li>
+        `
+      )
+      .join('');
+  } catch (error) {
+    receiptListNode.innerHTML = '<li>Unable to load receipts.</li>';
+  }
+}
+
+if (receiptForm) {
+  receiptForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(receiptForm);
+    const payload = Object.fromEntries(formData.entries());
+    const messageNode = document.getElementById('receiptMessage');
+
+    try {
+      const response = await fetch('/api/receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save receipt');
+      }
+
+      messageNode.textContent = 'Receipt saved successfully.';
+      messageNode.className = 'message success';
+      receiptForm.reset();
+      loadReceipts();
+    } catch (error) {
+      messageNode.textContent = error.message;
+      messageNode.className = 'message error';
+    }
+  });
+}
+
+if (payForm) {
+  payForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const amount = document.getElementById('payAmount').value;
+    const phone = document.getElementById('payPhone').value;
+    const accountReference = document.getElementById('payRef').value || 'SLAB';
+    const messageNode = document.getElementById('payMessage');
+
+    messageNode.textContent = 'Initiating STK Push...';
+    messageNode.className = 'message';
+
+    try {
+      const resp = await fetch('/api/mpesa/stkpush', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, phone, accountReference, transactionDesc: 'Payment' }),
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        throw new Error((data && data.error) || 'Failed to initiate STK push');
+      }
+
+      const checkoutId = data.checkoutId || (data.daraja && data.daraja.CheckoutRequestID) || null;
+      messageNode.textContent = 'STK initiated. Check your phone for the M-Pesa prompt.' + (checkoutId ? ` (Checkout: ${checkoutId})` : '');
+      messageNode.className = 'message success';
+
+      // Optionally refresh receipts after a delay to surface the pending receipt
+      setTimeout(loadReceipts, 3000);
+    } catch (err) {
+      messageNode.textContent = err.message || 'STK push failed';
+      messageNode.className = 'message error';
+    }
+  });
+}
+
+if (adminForm) {
+  adminForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const key = document.getElementById('adminKey').value.trim();
+    const messageNode = document.getElementById('adminMessage');
+    const statsGrid = document.getElementById('statsGrid');
+    const tableBody = document.getElementById('adminTableBody');
+
+    try {
+      const response = await fetch(`/api/admin?key=${encodeURIComponent(key)}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unauthorized');
+      }
+
+      statsGrid.hidden = false;
+      document.getElementById('receiptCount').textContent = data.receiptsCount ?? 0;
+      document.getElementById('inboxCount').textContent = data.inboxCount ?? 0;
+
+      if (!data.receipts || !data.receipts.length) {
+        tableBody.innerHTML = '<tr><td colspan="5">No receipts found.</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = data.receipts
+        .map(
+          (receipt) => `
+            <tr>
+              <td>${receipt.id}</td>
+              <td>${receipt.amount || '—'}</td>
+              <td>${receipt.sender || '—'}</td>
+              <td>${receipt.status || 'pending'}</td>
+              <td>${receipt.created_at ? new Date(receipt.created_at).toLocaleString() : '—'}</td>
+            </tr>
+          `
+        )
+        .join('');
+
+      messageNode.textContent = 'Dashboard loaded.';
+      messageNode.className = 'message success';
+    } catch (error) {
+      messageNode.textContent = error.message;
+      messageNode.className = 'message error';
+    }
+  });
+}
+
+loadHealth();
+loadReceipts();
