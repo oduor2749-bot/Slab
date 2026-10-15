@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLAB | Cash Deposit Tracker</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand">SLAB</div>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/admin">Admin</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container page">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="badge">Cash deposit tracker</span>
+          <h1>Track mobile cash deposits with confidence.</h1>
+          <p>
+            SLAB helps you log incoming deposits, review recent activity, and keep a simple audit trail for cash transactions.
+          </p>
+        </div>
+
+        <div class="status-card">
+          <h2>Service status</h2>
+          <p id="status">Checking service...</p>
+          <div class="meta-grid">
+            <div>
+              <span>Service</span>
+              <strong>SLAB</strong>
+            </div>
+            <div>
+              <span>Mode</span>
+              <strong>Web app</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid two-col">
+        <div class="panel">
+          <h2>New receipt</h2>
+          <form id="receiptForm" class="stack-form">
+            <label>
+              Amount
+              <input type="text" name="amount" placeholder="KES 2,500" required />
+            </label>
+            <label>
+              Sender
+              <input type="text" name="sender" placeholder="Jane Doe" required />
+            </label>
+            <label>
+              Message
+              <textarea name="message" rows="4" placeholder="Deposit note or reference"></textarea>
+            </label>
+            <label>
+              Status
+              <select name="status">
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </label>
+            <button type="submit">Save receipt</button>
+          </form>
+          <div id="receiptMessage" class="message" aria-live="polite"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Recent receipts</h2>
+          <ul id="receiptList" class="receipt-list">
+            <li>Loading receipts...</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

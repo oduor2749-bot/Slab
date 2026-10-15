@@ -1,22 +1,128 @@
-# Slab
-Mobile game for cash
+const statusNode = document.getElementById('status');
+const receiptListNode = document.getElementById('receiptList');
+const receiptForm = document.getElementById('receiptForm');
+const adminForm = document.getElementById('adminForm');
 
-This repository now includes a minimal Node.js service that matches the deployment expectations in `deploy/setup.sh`.
+async function loadHealth() {
+  if (!statusNode) return;
 
-## Quick start
+  try {
+    const response = await fetch('/health');
+    const data = await response.json();
+    statusNode.textContent = data.ok ? `Online • ${data.environment}` : 'Unavailable';
+    statusNode.classList.toggle('success', data.ok);
+  } catch (error) {
+    statusNode.textContent = 'Offline';
+    statusNode.classList.add('error');
+  }
+}
 
-1. Install dependencies:
-   npm install
-2. Copy the environment example:
-   cp .env.example .env
-3. Fill in the values in `.env`.
-4. Start the server:
-   npm start
+async function loadReceipts() {
+  if (!receiptListNode) return;
 
-Endpoints:
-- `GET /health`
-- `GET /admin` with `X-Admin-Key` or `?key=`
-- `POST /api/inbox/:secret`
-- `GET /api/inbox/:secret`
-- `POST /api/receipt`
-- `GET /api/receipts`
+  try {
+    const response = await fetch('/api/receipts');
+    const data = await response.json();
+
+    if (!data.receipts || !data.receipts.length) {
+      receiptListNode.innerHTML = '<li>No receipts yet.</li>';
+      return;
+    }
+
+    receiptListNode.innerHTML = data.receipts
+      .map(
+        (receipt) => `
+          <li>
+            <strong>${receipt.amount || 'Unknown amount'}</strong>
+            <div>From: ${receipt.sender || 'Unknown sender'}</div>
+            <div>Status: ${receipt.status || 'pending'}</div>
+            <div>${new Date(receipt.created_at).toLocaleString()}</div>
+          </li>
+        `
+      )
+      .join('');
+  } catch (error) {
+    receiptListNode.innerHTML = '<li>Unable to load receipts.</li>';
+  }
+}
+
+if (receiptForm) {
+  receiptForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(receiptForm);
+    const payload = Object.fromEntries(formData.entries());
+    const messageNode = document.getElementById('receiptMessage');
+
+    try {
+      const response = await fetch('/api/receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save receipt');
+      }
+
+      messageNode.textContent = 'Receipt saved successfully.';
+      messageNode.className = 'message success';
+      receiptForm.reset();
+      loadReceipts();
+    } catch (error) {
+      messageNode.textContent = error.message;
+      messageNode.className = 'message error';
+    }
+  });
+}
+
+if (adminForm) {
+  adminForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const key = document.getElementById('adminKey').value.trim();
+    const messageNode = document.getElementById('adminMessage');
+    const statsGrid = document.getElementById('statsGrid');
+    const tableBody = document.getElementById('adminTableBody');
+
+    try {
+      const response = await fetch(`/api/admin?key=${encodeURIComponent(key)}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unauthorized');
+      }
+
+      statsGrid.hidden = false;
+      document.getElementById('receiptCount').textContent = data.receiptsCount ?? 0;
+      document.getElementById('inboxCount').textContent = data.inboxCount ?? 0;
+
+      if (!data.receipts || !data.receipts.length) {
+        tableBody.innerHTML = '<tr><td colspan="5">No receipts found.</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = data.receipts
+        .map(
+          (receipt) => `
+            <tr>
+              <td>${receipt.id}</td>
+              <td>${receipt.amount || '—'}</td>
+              <td>${receipt.sender || '—'}</td>
+              <td>${receipt.status || 'pending'}</td>
+              <td>${receipt.created_at ? new Date(receipt.created_at).toLocaleString() : '—'}</td>
+            </tr>
+          `
+        )
+        .join('');
+
+      messageNode.textContent = 'Dashboard loaded.';
+      messageNode.className = 'message success';
+    } catch (error) {
+      messageNode.textContent = error.message;
+      messageNode.className = 'message error';
+    }
+  });
+}
+
+loadHealth();
+loadReceipts();

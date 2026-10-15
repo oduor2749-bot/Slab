@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SLAB Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand">SLAB Admin</div>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/admin">Admin</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container page admin-page">
+      <section class="panel admin-card">
+        <h1>Admin dashboard</h1>
+        <form id="adminForm" class="inline-form">
+          <label>
+            Admin key
+            <input type="password" id="adminKey" placeholder="Enter admin key" required />
+          </label>
+          <button type="submit">Load dashboard</button>
+        </form>
+
+        <div id="adminMessage" class="message" aria-live="polite"></div>
+
+        <div class="stats-grid" id="statsGrid" hidden>
+          <div class="stat-box">
+            <span>Receipts</span>
+            <strong id="receiptCount">0</strong>
+          </div>
+          <div class="stat-box">
+            <span>Inbox messages</span>
+            <strong id="inboxCount">0</strong>
+          </div>
+        </div>
+
+        <div class="panel table-panel">
+          <h2>Recent records</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Sender</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody">
+              <tr>
+                <td colspan="5">No data yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
