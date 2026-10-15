@@ -1,128 +1,40 @@
-const statusNode = document.getElementById('status');
-const receiptListNode = document.getElementById('receiptList');
-const receiptForm = document.getElementById('receiptForm');
-const adminForm = document.getElementById('adminForm');
+# SLAB
+Mobile game for cash
 
-async function loadHealth() {
-  if (!statusNode) return;
+This repository includes a website + API plus M-Pesa (Daraja) STK Push support.
 
-  try {
-    const response = await fetch('/health');
-    const data = await response.json();
-    statusNode.textContent = data.ok ? `Online • ${data.environment}` : 'Unavailable';
-    statusNode.classList.toggle('success', data.ok);
-  } catch (error) {
-    statusNode.textContent = 'Offline';
-    statusNode.classList.add('error');
-  }
-}
+## Quick start
 
-async function loadReceipts() {
-  if (!receiptListNode) return;
+1. Install dependencies:
+   npm install
+2. Copy the environment example:
+   cp .env.example .env
+3. Fill in the values in `.env` (especially MPESA_* values for STK push).
+4. Start the server:
+   npm start
 
-  try {
-    const response = await fetch('/api/receipts');
-    const data = await response.json();
+Then open:
+- http://localhost:3000/
+- http://localhost:3000/admin
 
-    if (!data.receipts || !data.receipts.length) {
-      receiptListNode.innerHTML = '<li>No receipts yet.</li>';
-      return;
-    }
+## STK Push (Daraja)
 
-    receiptListNode.innerHTML = data.receipts
-      .map(
-        (receipt) => `
-          <li>
-            <strong>${receipt.amount || 'Unknown amount'}</strong>
-            <div>From: ${receipt.sender || 'Unknown sender'}</div>
-            <div>Status: ${receipt.status || 'pending'}</div>
-            <div>${new Date(receipt.created_at).toLocaleString()}</div>
-          </li>
-        `
-      )
-      .join('');
-  } catch (error) {
-    receiptListNode.innerHTML = '<li>Unable to load receipts.</li>';
-  }
-}
+To initiate an STK push (Lipa na M-Pesa) you can POST to:
 
-if (receiptForm) {
-  receiptForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const formData = new FormData(receiptForm);
-    const payload = Object.fromEntries(formData.entries());
-    const messageNode = document.getElementById('receiptMessage');
+  POST /api/mpesa/stkpush
+  Content-Type: application/json
+  Body: { "amount": 100, "phone": "+2547XXXXXXXX", "accountReference": "INV-123", "transactionDesc": "Payment" }
 
-    try {
-      const response = await fetch('/api/receipt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+The server will contact Daraja and return the immediate response. When the user completes/declines the payment, Daraja will POST the asynchronous result to /api/mpesa/stkpush/callback (this URL is set automatically from MPESA_CALLBACK_BASE in .env).
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save receipt');
-      }
+## Testing locally with sandbox
 
-      messageNode.textContent = 'Receipt saved successfully.';
-      messageNode.className = 'message success';
-      receiptForm.reset();
-      loadReceipts();
-    } catch (error) {
-      messageNode.textContent = error.message;
-      messageNode.className = 'message error';
-    }
-  });
-}
+1. Set MPESA_ENV=sandbox and provide sandbox MPESA_CONSUMER_KEY and MPESA_CONSUMER_SECRET and MPESA_SHORTCODE/PASSKEY (from Safaricom sandbox portal).
+2. Ensure MPESA_CALLBACK_BASE is reachable by Safaricom (use a tunnel like ngrok and set the tunnel URL here).
+3. Initiate STK push via the sample curl below.
 
-if (adminForm) {
-  adminForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const key = document.getElementById('adminKey').value.trim();
-    const messageNode = document.getElementById('adminMessage');
-    const statsGrid = document.getElementById('statsGrid');
-    const tableBody = document.getElementById('adminTableBody');
+Example sandbox curl to start STK push:
 
-    try {
-      const response = await fetch(`/api/admin?key=${encodeURIComponent(key)}`);
-      const data = await response.json();
+curl -X POST http://localhost:3000/api/mpesa/stkpush -H "Content-Type: application/json" -d '{"amount":10,"phone":"+2547XXXXXXXX","accountReference":"TEST","transactionDesc":"Test pay"}'
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Unauthorized');
-      }
-
-      statsGrid.hidden = false;
-      document.getElementById('receiptCount').textContent = data.receiptsCount ?? 0;
-      document.getElementById('inboxCount').textContent = data.inboxCount ?? 0;
-
-      if (!data.receipts || !data.receipts.length) {
-        tableBody.innerHTML = '<tr><td colspan="5">No receipts found.</td></tr>';
-        return;
-      }
-
-      tableBody.innerHTML = data.receipts
-        .map(
-          (receipt) => `
-            <tr>
-              <td>${receipt.id}</td>
-              <td>${receipt.amount || '—'}</td>
-              <td>${receipt.sender || '—'}</td>
-              <td>${receipt.status || 'pending'}</td>
-              <td>${receipt.created_at ? new Date(receipt.created_at).toLocaleString() : '—'}</td>
-            </tr>
-          `
-        )
-        .join('');
-
-      messageNode.textContent = 'Dashboard loaded.';
-      messageNode.className = 'message success';
-    } catch (error) {
-      messageNode.textContent = error.message;
-      messageNode.className = 'message error';
-    }
-  });
-}
-
-loadHealth();
-loadReceipts();
+Example sample callback payload (sandbox) is included in samples/mpesa-callback-sample.json — you can POST that to /api/mpesa/stkpush/callback to simulate Daraja.
